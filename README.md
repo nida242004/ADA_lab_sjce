@@ -1,6 +1,6 @@
 # ADA_lab_jssstu
-*NOT COMPLETED, CODE FROM 1-9 IS ONLY DONE, REMAINING FILES SHD BE EDITED*
-*Design and Analysis of Algorithm Lab @SJCE*
+**NOT COMPLETED, CODE FROM 1-9 IS ONLY DONE, REMAINING FILES SHD BE EDITED**
+# *Design and Analysis of Algorithm Lab @SJCE*
 
 ## List of Programs
 
