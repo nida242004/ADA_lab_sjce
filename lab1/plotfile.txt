@@ -1,0 +1,7 @@
+set title "GCD"
+set xrange[10:100]
+set yrange[10:100]
+set xlabel "Particular pair of numbers"
+set ylabel "Count"
+set style data linespoints
+plot 'e_b.txt' title 'euclid_best','e_w.txt' title 'euclid_worst'
