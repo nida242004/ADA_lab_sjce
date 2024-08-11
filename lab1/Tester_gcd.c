@@ -11,16 +11,15 @@ int gcd_euclid(int m, int n) {
 }
 
 int gcd_modified(int m, int n) {
-    int min = (m < n) ? m : n;
-
-    while (min >= 1) {
-        if (m % min == 0 && n % min == 0) {
-            return min;
+    while (n > 0) {
+        if (n > m) {
+            int temp = m;
+            m = n;
+            n = temp;
         }
-        min--;
+        m = m - n;
     }
-
-    return 1; // If no common divisor is found, the GCD is 1
+    return m;
 }
 
 int gcd_consecutive(int m, int n) {
