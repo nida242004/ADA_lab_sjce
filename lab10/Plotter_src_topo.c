@@ -1,151 +1,114 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 
-#define SIZE 50
+#define MAX 100
 
-int graph[SIZE][SIZE], queue[SIZE], rear = -1, front = 0;
-int cnt = 0;
+typedef struct queue {
+    int f, r, *arr, cnt;
+} QUE;
 
-// Function to enqueue an element
-void enqueue(int ele) {
-    queue[++rear] = ele;
-    printf("-->%c", ele + 65);
-}
+int graph[MAX][MAX], topo_order[MAX], s[MAX];
+int count = 0; // To count the adjacency checks
 
-// Function to dequeue an element
-int dequeue() {
-    return queue[front++];
-}
-
-// Function to check if the queue is empty
-int isEmpty() {
-    if (front > rear) {
-        front = 0;
-        rear = -1;
-        return 1;
-    }
-    return 0;
-}
-
-// Function to compute the in-degree of a node
-int inDegree(int ind, int n) {
-    int indegree = 0;
-    for (int i = 0; i < n; i++) {
-        cnt++;  // Increment the operation counter
-        if (graph[i][ind] == 1) {
-            indegree++;
+void indegree(int a[MAX][MAX], int v, int inq[], QUE *temp, int flag[]) {
+    for (int i = 0; i < v; i++) {
+        for (int j = 0; j < v; j++) {
+            count++; // Count the adjacency check
+            if (a[j][i] == 1)
+                inq[i] = inq[i] + 1;
         }
-    }
-    return indegree;
-}
-
-// Function to perform topological sorting
-void topo(int n) {
-    int in[n];
-
-    for (int i = 0; i < n; i++) {
-        in[i] = inDegree(i, n);
-
-        if (in[i] == 0) {
-            enqueue(i);
-        }
-    }
-
-    int completed = 0;
-
-    while (completed < n) {
-        if (isEmpty()) {
-            printf("Cycle exists as no node with indegree exists\n");
-            exit(1);
-        }
-
-        int src = dequeue();
-        completed++;
-
-        for (int i = 0; i < n; i++) {
-            if (graph[src][i] == 1) {
-                graph[src][i] = 0;
-                in[i]--;
-
-                if (in[i] == 0) {
-                    enqueue(i);
-                }
-            }
+        if (inq[i] == 0) {
+            temp->r = (temp->r + 1) % v;
+            temp->arr[temp->r] = i;
+            temp->cnt = temp->cnt + 1;
+            flag[i] = 1;
         }
     }
 }
 
-// Function to generate and analyze graphs
-void plotter(int k) {
-    FILE *f1 = fopen("TopologicalBEST.txt", "a");
-    FILE *f2 = fopen("TopologicalWORST.txt", "a");
-
-    if (f1 == NULL || f2 == NULL) {
-        printf("Error opening file.\n");
-        exit(1);
-    }
-
-    int v;
-    int arr[SIZE][SIZE];  // Temporary adjacency matrix for each graph size
-
-    for (int i = 1; i <= 10; i++) {
-        v = i;
-
-        // Generate graph based on the type
-        if (k == 0) {  // Best-case scenario: Complete graph
-            for (int i = 0; i < v; i++) {
-                for (int j = 0; j < v; j++) {
-                    if (i != j) {
-                        arr[i][j] = 1;
-                    } else {
-                        arr[i][j] = 0;
-                    }
-                }
-            }
-        } else {  // Worst-case scenario: Linear chain
-            for (int i = 0; i < v; i++) {
-                for (int j = 0; j < v; j++) {
-                    arr[i][j] = 0;
-                }
-            }
-            for (int i = 0; i < v - 1; i++) {
-                arr[i][i + 1] = 1;
-            }
-        }
-
-        // Copy the generated graph to the global graph array
+void sourceremove(int a[MAX][MAX], int v, QUE *temp, int inq[], int flag[]) {
+    int cnt = 0;
+    while (temp->cnt != 0) {
+        int source = temp->arr[temp->f];
+        temp->f = (temp->f + 1) % v;
+        s[cnt] = source;
+        temp->cnt = temp->cnt - 1;
+        cnt++;
         for (int i = 0; i < v; i++) {
-            for (int j = 0; j < v; j++) {
-                graph[i][j] = arr[i][j];
+            //count++; // Count the adjacency check
+            if (a[source][i] == 1)
+                inq[i] = inq[i] - 1;
+            if (inq[i] == 0 && flag[i] == 0) {
+                temp->r = (temp->r + 1) % v;
+                temp->arr[temp->r] = i;
+                temp->cnt = temp->cnt + 1;
+                flag[i] = 1;
+            }
+        }
+    }
+
+    if (cnt != v) {
+        printf("Cycles exist, no topological sorting possible\n");
+    } else {
+        printf("The topological sorting is\n");
+        for (int i = 0; i < cnt; i++) // Corrected to print the valid elements in s
+            printf("%c\t", s[i] + 65);
+        printf("\n"); // Print new line after the topological order
+    }
+}
+
+void plotter() {
+    FILE *fp; 
+    fp=fopen("srm.txt","a");
+    srand(time(NULL));
+    for (int V = 2; V <= 10; V++) { // Using small values for V for simplicity
+        // Randomly create a graph with V vertices and edges
+        int E = rand() % (V * (V - 1) / 2);
+
+        for (int i = 0; i < V; i++) {
+            for (int j = 0; j < V; j++) {
+                graph[i][j] = 0;
             }
         }
 
-        // Reset variables for each graph size
-        cnt = 0;
-        rear = -1;
-        front = 0;
-
-        // Perform topological sorting
-        topo(v);
-
-        // Write results to the appropriate file
-        if (k == 0) {
-            fprintf(f1, "%d\t%d\n", v, cnt);  // Best-case results
-        } else {
-            fprintf(f2, "%d\t%d\n", v, cnt);  // Worst-case results
+        for (int i = 0; i < E; i++) {
+            int u = rand() % V;
+            int v = rand() % V;
+            if (u != v) {
+                graph[u][v] = 1;
+            }
         }
-    }
 
-    fclose(f1);
-    fclose(f2);
+        // Initialize the queue and auxiliary arrays for source removal process
+        QUE q;
+        q.f = 0;
+        q.r = -1;
+        q.cnt = 0;
+        q.arr = (int *)malloc(sizeof(int) * V);
+
+        int *inq = (int *)malloc(sizeof(int) * V);
+        int *flag = (int *)malloc(sizeof(int) * V);
+        for (int i = 0; i < V; i++) {
+            inq[i] = 0;
+            flag[i] = 0;
+        }
+
+        count = 0;
+
+        indegree(graph, V, inq, &q, flag);
+        sourceremove(graph, V, &q, inq, flag);
+
+        fprintf(fp, "%d\t%d\n", V, count);
+
+        free(q.arr);
+        free(inq);
+        free(flag);
+    }
+    fclose(fp);
 }
 
-// Main function to generate plots for best and worst-case scenarios
 int main() {
-    for (int i = 0; i < 2; i++) {
-        plotter(i);
-    }
-
-    printf("DATA ENTERED INTO THE FILE\n");
+    plotter();
     return 0;
 }

@@ -1,131 +1,116 @@
 #include <stdio.h>
 #include <stdlib.h>
-#define SIZE 50
-int cnt=0;
+int count = 0;
 
-int graph[SIZE][SIZE], queue[SIZE], rear = -1, front = 0;
-
-void enqueue(int ele)
+typedef struct queue
 {
-    queue[++rear] = ele;
-    printf("-->%c", ele + 65);
-}
+    int f, r, *arr, cnt;
+} QUE;
 
-int dequeue()
-{
-    return queue[front++];
-}
+int s[10];
 
-int isEmpty()
+void indegree(int *a[], int v, int inq[], QUE *temp, int flag[])
 {
-  
-    if (front > rear)
+    for (int i = 0; i < v; i++)
     {
-        front = 0;
-        rear = -1;
-        return 1;
-    }
-    return 0;
-}
-
-int inDegree(int ind, int n)
-{
-    int indegree = 0;
-    for (int i = 0; i < n; i++){
-            cnt++;
-        if (graph[i][ind] == 1){
-            indegree++;
-            }
-            }
-    return indegree;
-}
-
-void topo(int n)
-{
-    int in[n];
-
-    for (int i = 0; i < n; i++)
-    {
-        in[i] = inDegree(i, n);
-        
-        if (in[i] == 0){
-            enqueue(i);
-            
-            }
-    }
-
-    int completed = 0;
-
-    while (completed < n)
-    {
-
-        if (isEmpty())
+        for (int j = 0; j < v; j++)
         {
-            printf("Cycle exists as no node with indegree exists\n");
-            exit(1);
+            if (a[j][i] == 1)
+                inq[i] = inq[i] + 1;
         }
-
-        int src = dequeue();
-        completed++;
-
-        for (int i = 0; i < n; i++)
+        if (inq[i] == 0)
         {
-            if (graph[src][i] == 1)
+            temp->r = (temp->r + 1) % v;
+            temp->arr[temp->r] = i;
+            temp->cnt = temp->cnt + 1;
+            flag[i] = 1;
+        }
+    }
+}
+
+void sourceremove(int *a[], int v, QUE *temp, int inq[], int flag[])
+{
+    int cnt = 0;
+    while (temp->cnt != 0)
+    {
+        int source = temp->arr[temp->f];
+        temp->f = (temp->f + 1) % v;
+        s[cnt] = source;
+        temp->cnt = temp->cnt - 1;
+        cnt++;
+        for (int i = 0; i < v; i++)
+        {
+            if (a[source][i] == 1)
+                inq[i] = inq[i] - 1;
+            if (inq[i] == 0 && flag[i] == 0)
             {
-                graph[src][i] = 0;
-                in[i]--;
-                
-                if (in[i] == 0){
-                    enqueue(i);
-                    
-                    
-                    }
+                temp->r = (temp->r + 1) % v;
+                temp->arr[temp->r] = i;
+                temp->cnt = temp->cnt + 1;
+                flag[i] = 1;
             }
         }
+    }
+
+    if (cnt != v)
+    {
+        printf("Cycles exist no topological sorting possible\n");
+    }
+    else
+    {
+
+        printf("The topological sorting is\n");
+        for (int i = 0; i < v; i++)
+            printf("%c\t", s[i] + 65);
     }
 }
 
 void main()
 {
-    int n;
-    printf("\nEnter the number of nodes in the graph:\n");
-    scanf("%d", &n);
-    printf("\nEnter the adjacency matrix:\n");
-    for (int i = 0; i < n; i++)
+    int v;
+    printf("Enter number of vertices\n");
+    scanf("%d", &v);
+    int *arr[v];
+    for (int i = 0; i < v; i++)
+        arr[i] = (int *)malloc(sizeof(int) * v);
+    printf("Enter the adjacency matrix\n");
+
+    for (int i = 0; i < v; i++)
     {
-        for (int j = 0; j < n; j++)
+        // printf("Enter 1 for the vertices adjacent to vertex %c\n",i+65);
+        for (int j = 0; j < v; j++)
         {
-            scanf("%d", &graph[i][j]);
+            // printf("\nVertex %c : ",j+65);
+            scanf("%d", &arr[i][j]);
         }
     }
-    topo(n);
-    printf("the basic operation count for the given %d vertces matrix is %d\n",n,cnt);
+    printf("\n");
+
+    printf("Adjacency matrix\n");
+    for (int i = 0; i < v; i++)
+    {
+        for (int j = 0; j < v; j++)
+        {
+            printf("%d\t", arr[i][j]);
+        }
+        printf("\n");
+    }
+    printf("\n");
+    QUE q;
+    q.f = 0;
+    q.r = -1;
+    q.cnt = 0;
+    q.arr = (int *)malloc(sizeof(int) * v);
+
+    int *inq = (int *)malloc(sizeof(int) * v);
+    for (int i = 0; i < v; i++)
+        inq[i] = 0;
+    int *flag = (int *)malloc(sizeof(int) * v);
+    for (int i = 0; i < v; i++)
+        flag[i] = 0;
+
+    indegree(arr, v, inq, &q, flag);
+    sourceremove(arr, v, &q, inq, flag);
+
+    printf("\n");
 }
-/*output:-
-Enter the number of nodes in the graph:
-10
-
-Enter the adjacency matrix:
-0 1 1 0 0 0 1 1 0 0
-0 0 1 1 0 0 0 1 1 0
-0 0 0 1 1 0 0 0 1 1
-0 0 0 0 0 0 0 0 0 0
-0 0 0 0 0 0 0 0 0 0
-0 1 1 0 0 0 1 1 0 0
-0 0 1 1 0 0 0 1 1 0
-0 0 0 1 1 0 0 0 1 1
-0 0 0 0 0 0 0 0 0 0
-0 0 0 0 0 0 0 0 0 0
--->A-->F-->B-->G-->C-->H-->D-->E-->I-->Jthe basic operation count for the given 10 vertces matrix is 100
-
-Enter the number of nodes in the graph:
-5
-
-Enter the adjacency matrix:
-0 1 1 0 0
-0 0 1 1 0
-0 0 0 1 1
-0 0 0 0 0
-0 0 0 0 0
--->A-->B-->C-->D-->Ethe basic operation count for the given 5 vertces matrix is 25
-*/
