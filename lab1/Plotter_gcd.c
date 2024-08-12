@@ -32,8 +32,6 @@ int gcdConsecutiveIntegerCheck(int m, int n)
                 return i;
         }
     }
-
-    return m > n ? m : n;
 }
 
 int modifiedEuclids(int m, int n)
@@ -47,7 +45,7 @@ int modifiedEuclids(int m, int n)
             n = temp;
         }
         m = m - n;
-        count += 1;
+        count++;
     }
     return m;
 }
