@@ -1,46 +1,45 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <limits.h>
 
-#define x 10
-#define y 100
+int count = 0;
 
-float euclid(int m, int n) {
-    int r;
-    float count = 0;
-    while (n) {
-        count++;
-        r = m % n;
+int gcdEuclid(int m, int n)
+{
+    count = 0;
+    while (n != 0)
+    {
+        int temp = m % n;
         m = n;
-        n = r;
+        n = temp;
+        count++;
     }
-    return count;
+
+    return m;
 }
 
-float consec(int m, int n) {
-    int min;
-    float count = 0;
-    min = m;
-    if (n < min) {
-        min = n;
-    }
-    while (1) {
+int gcdConsecutiveIntegerCheck(int m, int n)
+{
+    count = 0;
+    int t = m > n ? n : m;
+    for (int i = t; i > 0; i--)
+    {
         count++;
-        if (m % min == 0) {
+        if (m % i == 0)
+        {
             count++;
-            if (n % min == 0) {
-                break;
-            }
-            min -= 1;
-        } else {
-            min -= 1;
+            if (n % i == 0)
+                return i;
         }
     }
-    return count;
+
+    return m > n ? m : n;
 }
 
-float modified(int m, int n) {
+int modifiedEuclids(int m, int n)
+{
     int temp;
-    float count = 0;
+    count = 0;
     while (n > 0) {
         if (n > m) {
             temp = m;
@@ -50,76 +49,104 @@ float modified(int m, int n) {
         m = m - n;
         count += 1;
     }
-    return count; // m is the GCD
+    return m;
 }
 
-void analysis(int ch) {
-    int m, n, i, j, k;
-    float count, maxcount, mincount;
-    FILE *fp1, *fp2;
+void tester()
+{
+    int m, n;
+    printf("Enter 2 numbers : ");
+    scanf("%d%d", &m, &n);
 
-    for (i = x; i <= y; i += 10) {
-        maxcount = 0;
-        mincount = 10000;
-        for (j = 2; j <= i; j++) { // To generate the data
-            for (k = 2; k <= i; k++) {
-                count = 0;
-                m = j;
-                n = k;
-                switch (ch) {
-                    case 1:
-                        count = euclid(m, n);
-                        break;
-                    case 2:
-                        count = consec(m, n);
-                        break;
-                    case 3:
-                        count = modified(m, n);
-                        break;
-                }
-                if (count > maxcount) // To find the maximum basic operations among all the combinations between 2 to n
-                    maxcount = count;
-                if (count < mincount)
-                    // To find the minimum basic operations among all the combinations between 2 to n
-                    mincount = count;
+    if (m < 0 && n < 0)
+    {
+        printf("Cannot find gcd...Invalid inputs...");
+    }
+
+    printf("gcd through euclid algorithm :%d\n", gcdEuclid(m, n));
+    printf("gcd through consecutive checking method :%d\n", gcdConsecutiveIntegerCheck(m, n));
+    printf("gcd through repeated subtraction method :%d\n", modifiedEuclids(m, n));
+}
+
+void plotter()
+{
+    FILE *f1 = fopen("euclidBest.txt", "w");
+    FILE *f2 = fopen("euclidWorst.txt", "w");
+    FILE *f3 = fopen("consecBest.txt", "w");
+    FILE *f4 = fopen("consecWorst.txt", "w");
+    FILE *f5 = fopen("modifiedBest.txt", "w");
+    FILE *f6 = fopen("modifiedWorst.txt", "w");
+
+    for (int i = 10; i <= 100; i += 10)
+    {
+        int min = INT_MAX, max = INT_MIN;
+        for (int j = 2; j <= i; j++)
+        {
+            for (int k = 2; k <= i; k++)
+            {
+                gcdEuclid(j, k);
+                if (count < min)
+                    min = count;
+                if (count > max)
+                    max = count;
             }
         }
-        switch (ch) {
-            case 1:
-                fp2 = fopen("e_b.txt", "a");
-                fp1 = fopen("e_w.txt", "a");
-                break;
-            case 2:
-                fp2 = fopen("c_b.txt", "a");
-                fp1 = fopen("c_w.txt", "a");
-                break;
-            case 3:
-                fp2 = fopen("m_b.txt", "a");
-                fp1 = fopen("m_w.txt", "a");
-                break;
+        fprintf(f1, "%d\t%d\n", i, min);
+        fprintf(f2, "%d\t%d\n", i, max);
+    }
+
+    for (int i = 10; i <= 100; i += 10)
+    {
+        int min = INT_MAX, max = INT_MIN;
+        for (int j = 2; j <= i; j++)
+        {
+            for (int k = 2; k <= i; k++)
+            {
+                gcdConsecutiveIntegerCheck(j, k);
+                if (count < min)
+                    min = count;
+                if (count > max)
+                    max = count;
+            }
         }
-        fprintf(fp2, "%d %.2f\n", i, mincount);
-        fclose(fp2);
-        fprintf(fp1, "%d %.2f\n", i, maxcount);
-        fclose(fp1);
+        fprintf(f3, "%d\t%d\n", i, min);
+        fprintf(f4, "%d\t%d\n", i, max);
+    }
+
+    for (int i = 10; i <= 100; i += 10)
+    {
+        int min = INT_MAX, max = INT_MIN;
+        for (int j = 2; j <= i; j++)
+        {
+            for (int k = 2; k <= i; k++)
+            {
+                modifiedEuclids(j, k);
+                if (count < min)
+                    min = count;
+                if (count > max)
+                    max = count;
+            }
+        }
+        fprintf(f5, "%d\t%d\n", i, min);
+        fprintf(f6, "%d\t%d\n", i, max);
     }
 }
 
-int main() {
+void main()
+{
     int ch;
-    while (1) {
-        printf("GCD\n");
-        printf("1. Euclid\n2. modified Euclid\n3. consecutive integer method\n");
-        scanf("%d", &ch);
-        switch (ch) {
-            case 1:
-            case 2:
-            case 3:
-                analysis(ch);
-                break;
-            default:
-                exit(1);
-        }
+    printf("\nEnter:\n1.Tester\n2.Plotter\n");
+    scanf("%d", &ch);
+
+    switch (ch)
+    {
+    case 1:
+        tester();
+        break;
+    case 2:
+        plotter();
+        break;
+    default:
+        printf("Invalid Choice!!");
     }
-    return 0;
 }
