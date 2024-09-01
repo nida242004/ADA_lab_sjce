@@ -30,19 +30,16 @@ int main()
 {
     int m, n;
     char text[100], pattern[100];
-    printf("ENTER THE PATTERN LENGTH\n");
-    scanf("%d", &m);
-    printf("ENTER THE PATTERN\n");
-    getchar(); // Consume the newline character left in the input buffer
-    fgets(pattern, sizeof(pattern), stdin);
-    pattern[strcspn(pattern, "\n")] = '\0'; // Remove the newline character from the input
     printf("ENTER THE TEXT LENGTH\n");
     scanf("%d", &n);
     printf("ENTER THE TEXT\n");
-    getchar(); // Consume the newline character left in the input buffer
-    fgets(text, sizeof(text), stdin);
-    text[strcspn(text, "\n")] = '\0'; // Remove the newline character from the input
-    int comparisons = stringmatching(text, pattern, n, m);
-    printf("Number of comparisons: %d\n", comparisons);
+    scanf(" %[^\n]", text);//reads white spaces as well
+
+    printf("ENTER THE PATTERN LENGTH\n");
+    scanf("%d", &m);
+    printf("ENTER THE PATTERN\n");
+    scanf("%s", pattern);
+    
+    stringmatching(text, pattern, n, m);
     return 0;
 }
