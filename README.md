@@ -1,5 +1,3 @@
-# NOT COMPLETED, CODE FROM 1-11 IS ONLY DONE, REMAINING FILES SHD BE EDITED
-
 # *Design and Analysis of Algorithm Lab @SJCE*
 
 ## List of Programs
